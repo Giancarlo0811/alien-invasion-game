@@ -1,5 +1,6 @@
 import sys
 import pygame
+from pygame.sprite import Group
 
 import game_functions
 from settings import Settings
@@ -17,13 +18,15 @@ def run_game():
 
     # Crear nave
     ship = Ship(ai_settings, screen)
+    # Crear grupo de balas
+    bullets = Group()
 
     # Iniciar loop principal del juego
     while True:
-        gf.check_events(ship)
+        gf.check_events(ai_settings, screen, ship, bullets)
         ship.update()
-
-        gf.update_screen(ai_settings, screen, ship)
+        gf.update_bullets(bullets)
+        gf.update_screen(ai_settings, screen, ship, bullets)
 
 
 run_game()

@@ -1,9 +1,9 @@
 import sys
 import pygame
+from time import sleep
 
 from bullet import Bullet
 from alien import Alien
-
 
 def check_keydown_events(event, ai_settings, screen, ship, bullets):
     """Eventos al presionar teclado"""
@@ -57,7 +57,7 @@ def update_screen(ai_settings, screen, ship, aliens, bullets):
     pygame.display.flip()
 
 
-def update_bullets(bullets):
+def update_bullets(ai_settings, screen, ship, bullets, aliens):
     """Actualizar posicion de las balas y borrar balas viejas"""
     # Actualizar posicion de las balas
     bullets.update()
@@ -68,6 +68,18 @@ def update_bullets(bullets):
             bullets.remove(bullet)
     # print(len(bullets))
 
+    check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets)
+
+
+def check_bullet_alien_collisions(ai_settings, screen, ship, aliens, bullets):
+    """Responder a bala-alien colision"""
+    # Eliminar bala y alien que colisionan
+    colissions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+
+    if len(aliens) == 0:
+        # Destruir balas existentes y crear nueva flota
+        bullets.empty()
+        create_fleet(ai_settings, screen, ship, aliens)
 
 def get_number_aliens_x(ai_settings, alien_width):
     """Determinar numero de aliens que caben en una fila"""
@@ -125,8 +137,46 @@ def change_fleet_direction(ai_settings, aliens):
     ai_settings.fleet_direction *= -1
 
 
-def update_aliens(ai_settings, aliens):
+def check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
+    """Verificar si un alien llega al final"""
+    screen_rect = screen.get_rect()
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            # La nave fue golpeada
+            ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+            break
+
+
+def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     """Verificar si flota esta en el borde
         y actualizar posicion de todos los aliens"""
     check_fleet_edges(ai_settings, aliens)
     aliens.update()
+
+    # alien-nave colisiones
+    if pygame.sprite.spritecollideany(ship, aliens):
+        ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+
+    # Verificar aliens que llegaron al final
+    check_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
+
+
+def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
+    """responder a una nave golpeada por un alien"""
+    if stats.ships_left > 0:
+        # Decrementar ships_left
+        stats.ships_left -= 1
+
+        # Vaciar lista de aliens y balas
+        aliens.empty()
+        bullets.empty()
+
+        # Crear nueva flota de aliens y centrar nave
+        create_fleet(ai_settings, screen, ship, aliens)
+        ship.center_ship()
+
+        # Pausa
+        sleep(0.5)
+
+    else:
+        stats.game_active = False

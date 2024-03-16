@@ -21,5 +21,5 @@ $ cd alien-invasion-game
 ```
 ### Correr juego
 ```
-python alien_invasion.py
+$ python alien_invasion.py
 ```

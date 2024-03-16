@@ -11,3 +11,15 @@ En Alien Invasion, el jugador controla una nave que aparece en la parte inferior
 # Controles
 - Barra espaciadora para disparar
 - Flechas izquierda y derecha para mover la nave
+
+# Jugar
+### Clonar repositorio
+```
+$ git clone https://github.com/Giancarlo0811/alien-invasion-game.git
+
+$ cd alien-invasion-game
+```
+### Correr juego
+```
+python alien_invasion.py
+```
